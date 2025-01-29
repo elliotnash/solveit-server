@@ -1,0 +1,10 @@
+# Secrets
+.env
+
+# IDEs
+.vscode
+.idea
+.fleet
+
+# Other stuff
+node_modules
