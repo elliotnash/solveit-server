@@ -25,19 +25,19 @@ ANSWER:
 4.8
 
 UNITS:
-kg⋅m²/s
+\(kg \frac{m^2}{s}\)
 
 EXPLANATION:
 The net torque is calculated by summing the torques from each force. The 8 N downward force at 0.80 m creates a clockwise torque: 0.80 m * 8 N = 6.4 N⋅m. The 12 N upward force at 0.60 m creates a counterclockwise torque: 0.60 m * 12 N = 7.2 N⋅m. Net torque = 7.2 - 6.4 = 0.8 N⋅m. Angular momentum L = τ_net * t = 0.8 N⋅m * 6.0 s = 4.8 kg⋅m²/s.
 `;
 
 export const frQuestionSystemPrompt = `
-You will be provided a college physics problem. Please read and answer the question, using the other information as context. Please output your response in JSON format, with the numeric/symbolic answer under ANSWER, the units under UNITS if applicable, and a brief explanation under EXPLANATION. Refer to the following example.
+You will be provided a college physics problem. Please read and answer the question, using the other information as context. Please output your response, with the numeric/symbolic answer under ANSWER, the units under UNITS if applicable, and a brief explanation under EXPLANATION. Format all equations and units using LaTeX. Refer to the following example.
 
-EXAMPLE JSON INPUT
+EXAMPLE INPUT
 ${exampleFRQuestion}
 
-EXAMPLE JSON OUTPUT
+EXAMPLE OUTPUT
 ${exampleFRQuestionOutput}
 `;
 
@@ -48,7 +48,7 @@ const frAnswerSchema = z.object({
 });
 
 export const frConversionSystemPrompt = `
-Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem.
+Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem. All of these keys should use LaTeX formatting when necessary.
 `;
 
 const client = new OpenAI({
