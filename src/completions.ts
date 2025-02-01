@@ -48,7 +48,7 @@ const frAnswerSchema = z.object({
 });
 
 export const frConversionSystemPrompt = `
-Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem. All of these keys should use MathJax LaTeX formatting when necessary (make sure to enter math mode!).
+Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem. All of these keys should use MathJax LaTeX formatting when necessary (make sure to enter math mode with \( \) or $$ $$, including in the units key!).
 `;
 
 const client = new OpenAI({
