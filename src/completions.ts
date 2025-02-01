@@ -32,7 +32,7 @@ The net torque is calculated by summing the torques from each force. The 8 N dow
 `;
 
 export const frQuestionSystemPrompt = `
-You will be provided a college physics problem. Please read and answer the question, using the other information as context. Please output your response, with the numeric/symbolic answer under ANSWER, the units under UNITS if applicable, and a brief explanation under EXPLANATION. Format all equations and units using LaTeX. Refer to the following example.
+You will be provided a college physics problem. Please read and answer the question, using the other information as context. Please output your response, with the numeric/symbolic answer under ANSWER, the units under UNITS if applicable, and a brief explanation under EXPLANATION. Format all equations and units using MathJax LaTeX (make sure to enter math mode!). Refer to the following example.
 
 EXAMPLE INPUT
 ${exampleFRQuestion}
@@ -48,7 +48,7 @@ const frAnswerSchema = z.object({
 });
 
 export const frConversionSystemPrompt = `
-Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem. All of these keys should use MathJax LaTeX formatting when necessary.
+Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem. All of these keys should use MathJax LaTeX formatting when necessary (make sure to enter math mode!).
 `;
 
 const client = new OpenAI({
