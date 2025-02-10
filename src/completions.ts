@@ -24,7 +24,7 @@ export const exampleFRQuestionOutput = `
 ANSWER:
 4.8
 
-UNITS:
+UNIT:
 \(kg \frac{m^2}{s}\)
 
 EXPLANATION:
@@ -32,7 +32,7 @@ The net torque is calculated by summing the torques from each force. The 8 N dow
 `;
 
 export const frQuestionSystemPrompt = `
-You will be provided a college physics problem. Please read and answer the question, using the other information as context. Please output your response, with the numeric/symbolic answer under ANSWER, the units under UNITS if applicable, and a brief explanation under EXPLANATION. Format all equations and units using MathJax LaTeX (make sure to enter math mode!). Refer to the following example.
+You will be provided a college physics problem. Please read and answer the question, using the other information as context. Please output your response, with the numeric/symbolic answer under ANSWER, the units under UNIT if applicable, and a brief explanation under EXPLANATION. Format all equations and units using MathJax LaTeX (make sure to use LaTeX inline formatting with \( \) for the unit and answer keys!). Refer to the following example.
 
 EXAMPLE INPUT
 ${exampleFRQuestion}
@@ -48,13 +48,26 @@ const frAnswerSchema = z.object({
 });
 
 export const frConversionSystemPrompt = `
-Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem. All of these keys should use MathJax LaTeX formatting when necessary (make sure to enter math mode with \( \) or $$ $$, including in the units key!).
+Extract the answer, unit (if applicable), and explanation from the following answer to a physics problem. All of these keys should use MathJax LaTeX formatting when necessary (make sure to use inline formatting with \( \) for the unit and answer keys!).
 `;
 
 const client = new OpenAI({
 	baseURL: env.openaiBaseUrl,
 	apiKey: env.openaiApiKey,
 });
+
+function wrapLatex(inp: string) {
+	if (inp.startsWith("\\[") || inp.startsWith("$$")) {
+		return inp;
+	}
+	if (inp.startsWith("\\(")) {
+		return `\\(${inp.slice(2, -2)}\\)`;
+	}
+	if (inp.startsWith("$")) {
+		return `\\(${inp.slice(1, -1)}\\)`;
+	}
+	return `\\(${inp}\\)`;
+}
 
 export async function getFreeResponseAnswer(
 	question: string,
@@ -82,22 +95,44 @@ export async function getFreeResponseAnswer(
 		retries++;
 	}
 
-	let jsonAnswer: z.infer<typeof frAnswerSchema> | null = null;
-	while (jsonAnswer == null) {
-		if (retries >= 3) {
-			return undefined;
-		}
-		const conversion = await client.beta.chat.completions.parse({
-			model: env.jsonModel,
-			messages: [
-				{ role: "system", content: frConversionSystemPrompt },
-				{ role: "user", content: answer },
-			],
-			response_format: zodResponseFormat(frAnswerSchema, "answer"),
-		});
-		jsonAnswer = conversion.choices[0].message.parsed;
-		retries++;
-	}
+	console.log("GOT ANSWER");
+	console.log(answer);
 
-	return jsonAnswer;
+	const ans = answer
+		.slice(answer.indexOf("ANSWER:") + 7, answer.indexOf("UNIT:"))
+		.trim();
+	const unit = answer
+		.slice(answer.indexOf("UNIT:") + 5, answer.indexOf("EXPLANATION:"))
+		.trim();
+	const explanation = answer.slice(answer.indexOf("EXPLANATION:") + 12).trim();
+
+	const manJson: z.infer<typeof frAnswerSchema> = {
+		answer: wrapLatex(ans),
+		unit: wrapLatex(unit),
+		explanation,
+	};
+
+	return manJson;
+
+	// let jsonAnswer: z.infer<typeof frAnswerSchema> | null = null;
+	// while (jsonAnswer == null) {
+	// 	if (retries >= 3) {
+	// 		return undefined;
+	// 	}
+	// 	const conversion = await client.beta.chat.completions.parse({
+	// 		model: env.jsonModel,
+	// 		messages: [
+	// 			{ role: "system", content: frConversionSystemPrompt },
+	// 			{ role: "user", content: answer },
+	// 		],
+	// 		response_format: zodResponseFormat(frAnswerSchema, "answer"),
+	// 	});
+	// 	jsonAnswer = conversion.choices[0].message.parsed;
+	// 	retries++;
+	// }
+
+	// console.log("GOT JSON ANSWER");
+	// console.log(jsonAnswer);
+
+	// return jsonAnswer;
 }
